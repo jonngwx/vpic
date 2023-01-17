@@ -323,6 +323,8 @@ vpic_simulation::dump_hydro( const char *sp_name,
   }
 
   if( !fbase ) ERROR(( "Invalid filename" ));
+#define NUM_TS 128
+  BEGIN_TURNSTILE(NUM_TS) {
 
   if( rank()==0 )
     MESSAGE(("Dumping \"%s\" hydro fields to \"%s\"",sp->name,fbase));
@@ -348,6 +350,8 @@ vpic_simulation::dump_hydro( const char *sp_name,
   WRITE_ARRAY_HEADER( h, 3, dim, fileIO );
   fileIO.write( h, dim[0]*dim[1]*dim[2] );
   if( fileIO.close() ) ERROR(( "File close failed on dump hydro." ));
+  } END_TURNSTILE;
+#undef NUM_TS
 }
 
 void
