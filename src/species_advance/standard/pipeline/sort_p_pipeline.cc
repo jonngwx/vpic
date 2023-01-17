@@ -355,11 +355,11 @@ sort_p_pipeline( species_t * sp )
   next             = ALIGN_PTR( int,          aux_p + n_particle, 128);
   coarse_partition = ALIGN_PTR( int,          next  + n_voxel,    128);
 
-  start_of_free = coarse_partition + sizeof(int)*cp_stride*n_pipeline + 1;
+  start_of_free = coarse_partition + cp_stride*n_pipeline + 1;
   #ifdef VPIC_GLOBAL_PARTICLE_ID
   if(has_ids) {
     aux_p_id       = ALIGN_PTR( size_t,       start_of_free,      128);
-    start_of_free  = aux_p_id + sizeof(size_t) * n_particle;
+    start_of_free  = aux_p_id +  n_particle;
   } else {
     aux_p_id       = nullptr;
   }
@@ -367,7 +367,7 @@ sort_p_pipeline( species_t * sp )
   #ifdef VPIC_PARTICLE_ANNOTATION
   if(has_annotation) {
     aux_p_annotation = ALIGN_PTR(annotation_t, start_of_free,     128);
-    start_of_free    = aux_p_annotation + sizeof(annotation_t)*has_annotation * n_particle;
+    start_of_free    = aux_p_annotation + has_annotation * n_particle;
   } else {
     aux_p_annotation = nullptr;
   }
