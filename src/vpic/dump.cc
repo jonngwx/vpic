@@ -1084,6 +1084,10 @@ vpic_simulation::accumulate_buffered_particle_dump(const char * sp_name, const i
 
   const int mpi_rank = rank();
   sp->buf_n_valid[frame] = 0;
+  size_t annotation_offset = 0; 
+  for(int o = 0; o < frame; o++) {
+    annotation_offset = annotation_offset + sp->buf_n_valid[o]; 
+  }
 
   // Loop over particles
   for(int64_t n = 0; n < sp->np && n < sp->buf_n_particles; n++) {
@@ -1145,7 +1149,7 @@ vpic_simulation::accumulate_buffered_particle_dump(const char * sp_name, const i
     #ifdef VPIC_PARTICLE_ANNOTATION
     if(sp->has_annotation) {
       for(int a = 0; a < sp->has_annotation; a++) {
-       const size_t out_index = sp->buf_n_particles * sp->buf_n_frames * a + sp->buf_n_particles * frame + n;
+       const size_t out_index = sp->buf_n_particles * sp->buf_n_frames * a + annotation_offset + n;
        const size_t in_index  = sp->has_annotation * n + a;
        sp->output_buffer_an[out_index] = sp->p_annotation[in_index];
       }
@@ -1253,7 +1257,10 @@ vpic_simulation::write_buffered_particle_dump(const char * dname, const char * s
 
   // Find out which part of the global output falls to us
   int64_t total_entries, offset;
-  int64_t local_entries = sp->buf_size;
+  int64_t local_entries = 0; 
+  for(int frame = 0; frame < sp->buf_n_frames; frame++){
+    local_entries = local_entries + sp->buf_n_valid[frame];
+  }
   MPI_Allreduce(&local_entries, &total_entries, 1, MPI_LONG_LONG, MPI_SUM, MPI_COMM_WORLD);
   MPI_Scan(&local_entries, &offset, 1, MPI_LONG_LONG, MPI_SUM, MPI_COMM_WORLD);
   offset -= local_entries;
