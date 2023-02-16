@@ -440,7 +440,7 @@ species_t * tracerspecies_by_predicate(species_t* parentspecies,
   const float m = parentspecies->m;
   const size_t count_true = std::count_if( parentspecies->p, parentspecies->p + parentspecies->np, f);
   const size_t max_local_np = ceil(parentspecies->max_np * count_true/float(parentspecies->np)) + 1;
-  const size_t max_local_nm = ceil(parentspecies->max_nm * count_true/float(parentspecies->np)) + 1; //Commented this out for now as we need it to prevent dropping particles.
+  const size_t max_local_nm = ceil(parentspecies->max_nm * count_true/float(parentspecies->np)) + 1; // In some cases it is necessary to just use the max number as we need it to prevent dropping particles.
   const int sort_interval = parentspecies->sort_interval;
   const int sort_out_of_place = parentspecies->sort_out_of_place;
 

@@ -1084,6 +1084,8 @@ vpic_simulation::accumulate_buffered_particle_dump(const char * sp_name, const i
 
   const int mpi_rank = rank();
   sp->buf_n_valid[frame] = 0;
+  // find the memory offset based on number of valid particles in 
+  // previous frames
   size_t annotation_offset = 0; 
   for(int o = 0; o < frame; o++) {
     annotation_offset = annotation_offset + sp->buf_n_valid[o]; 
@@ -1121,7 +1123,7 @@ vpic_simulation::accumulate_buffered_particle_dump(const char * sp_name, const i
     int64_t global_i = VOXEL(gix, giy, giz, gnx-2, gny-2, gnz-2);
     #endif
 
-    const size_t index = frame*sp->buf_n_particles + n;
+    const size_t index = annotation_offset + n;
 
     // Particle Properties
     sp->output_buffer_dx[index] = sp->p[n].dx;
