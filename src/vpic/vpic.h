@@ -367,7 +367,7 @@ protected:
               _sp.np = PBUF_SIZE;
           }
 
-          //COPY( _sp.p, &sp_p[buf_start], _sp.np );
+          COPY( _sp.p, &_sp.p[buf_start], _sp.np );
 
           center_p( &_sp, interpolator_array );
 
