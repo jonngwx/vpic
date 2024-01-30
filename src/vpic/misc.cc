@@ -84,7 +84,8 @@ vpic_simulation::inject_particle( species_t * sp,
   #ifdef VPIC_GLOBAL_PARTICLE_ID
   // Set particle ID.
   if(sp->has_ids) {
-    sp->p_id[old_np] = sp->generate_particle_id( old_np, sp->max_np );
+    // We store last_id for each rank because particle injection can cause id duplication
+    sp->p_id[old_np] = sp->generate_particle_id( sp->last_id++, sp->max_np );
   }
   #endif
   #ifdef VPIC_PARTICLE_ANNOTATION

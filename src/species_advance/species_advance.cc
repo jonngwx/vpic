@@ -266,6 +266,7 @@ species( const char * name,
   #ifdef VPIC_GLOBAL_PARTICLE_ID
   sp->has_ids = 0;    // By default a newly created species will not have IDs.
   sp->p_id = nullptr; // if we ever dereference this nullptr, I screwed up
+  sp->last_id = 0; 
   #endif
   #ifdef VPIC_PARTICLE_ANNOTATION
   sp->has_annotation = 0;    // By default a newly created species will not have annotation buffers

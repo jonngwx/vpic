@@ -68,6 +68,7 @@ class species_t {
         #ifdef VPIC_GLOBAL_PARTICLE_ID
         int has_ids;                        // Does this species care about IDs?
         size_t* ALIGNED(128) p_id;          // Separate array of IDs
+        int last_id;                        // The last np used to initialize IDs
         #endif
         #ifdef VPIC_PARTICLE_ANNOTATION
         typedef VPIC_PARTICLE_ANNOTATION annotation_t;
