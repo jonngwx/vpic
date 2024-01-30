@@ -9,6 +9,9 @@
  */
 
 #include "species_advance.h"
+#ifdef VPIC_ENABLE_HDF5
+#include "hdf5.h"
+#endif
 
 #ifdef VPIC_PARTICLE_ANNOTATION
 typedef VPIC_PARTICLE_ANNOTATION annotation_t;
@@ -439,8 +442,10 @@ species_t * tracerspecies_by_predicate(species_t* parentspecies,
   const float q = parentspecies->q;
   const float m = parentspecies->m;
   const size_t count_true = std::count_if( parentspecies->p, parentspecies->p + parentspecies->np, f);
-  const size_t max_local_np = ceil(parentspecies->max_np * count_true/float(parentspecies->np)) + 1;
-  const size_t max_local_nm = ceil(parentspecies->max_nm * count_true/float(parentspecies->np)) + 1; // In some cases it is necessary to just use the max number as we need it to prevent dropping particles.
+  size_t count_max; // find the maximum over all ranks to prevent dropping of particles? 
+  MPI_Allreduce(&count_true,&count_max, 1, MPI_LONG_LONG, MPI_MAX, MPI_COMM_WORLD); 
+  const size_t max_local_np = ceil(parentspecies->max_np * count_max/float(parentspecies->np)) + 1;
+  const size_t max_local_nm = ceil(parentspecies->max_nm * count_max/float(parentspecies->np)) + 1; // In some cases it is necessary to just use the max number as we need it to prevent dropping particles.
   const int sort_interval = parentspecies->sort_interval;
   const int sort_out_of_place = parentspecies->sort_out_of_place;
 
