@@ -547,7 +547,7 @@ species_t * tracerspecies_by_id( species_t* parentspecies,
   for (int i=0; i < parentspecies->np; i++) {
     if (std::binary_search(pid_list, pid_list+num_ids, parentspecies->p_id[i])) {
       // DEBUG
-      sim_log("pid: " << parentspecies->p_id[i]);
+      MESSAGE(("pid: %d",  parentspecies->p_id[i]));
       count_true++;
     }
   }
@@ -558,7 +558,7 @@ species_t * tracerspecies_by_id( species_t* parentspecies,
   const int sort_interval = parentspecies->sort_interval;
   const int sort_out_of_place = parentspecies->sort_out_of_place;
 
-  species_t* tracerspecies = species(name.c_str(), q, m, max_local_np, max_local_nm, sort_interval, sort_out_of_place, grid);
+  species_t* tracerspecies = species(tracername.c_str(), q, m, max_local_np, max_local_nm, sort_interval, sort_out_of_place, grid);
   if(!tracerspecies) ERROR(( "Creation of tracerspecies failed" ));
 
   // If we do compile without global_particle_IDs the resulting species will
