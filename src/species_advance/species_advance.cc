@@ -332,7 +332,7 @@ species_t * tracerspecies_by_skip(species_t* parentspecies,
                                   species_t* sp_list,
                                   grid_t* grid) {
 
-  if(find_species_name(name.c_str(), sp_list)) {
+  if(find_species_name(tracername.c_str(), sp_list)) {
     ERROR(( "Species with name %d already exists", name.c_str() ));
   }
   const float q = parentspecies->q;
