@@ -723,6 +723,10 @@ protected:
     species_t* tracerspecies =  tracerspecies_by_skip(parentspecies, parentspecies->np/n, copyormove, tracername, species_list, grid);
     return append_species(tracerspecies, &species_list);
   }
+  inline species_t * make_tracers_by_id(species_t* parentspecies, size_t* pid_list, size_t num_ids, const Tracertype copyormove, std::string tracername) {
+    species_t* tracerspecies = tracerspecies_by_id(parentspecies, pid_list, num_ids, copyormove, tracername, species_list, grid); 
+    return append_species(tracerspecies, &species_list); 
+  }
 
   // versions without user supplied name
   inline species_t * make_tracers_by_percentage(species_t* parentspecies, const float percentage, const Tracertype copyormove) {

@@ -79,6 +79,15 @@ tracerspecies_by_predicate( species_t* parentspecies,
                        species_t* sp_list,
                        grid_t* grid
                      );
+species_t *
+tracerspecies_by_id( species_t* parentspecies,
+                       size_t* pid_list,
+                       size_t num_ids,
+                       const Tracertype copyormove,
+                       std::string tracername,
+                       species_t* sp_list,
+                       grid_t* grid
+                     );
 
 // FIXME: TEMPORARY HACK UNTIL THIS SPECIES_ADVANCE KERNELS
 // CAN BE CONSTRUCTED ANALOGOUS TO THE FIELD_ADVANCE KERNELS

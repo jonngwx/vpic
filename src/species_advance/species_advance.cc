@@ -508,3 +508,111 @@ species_t * tracerspecies_by_predicate(species_t* parentspecies,
   }
   return tracerspecies;
 }
+
+
+/**
+ * @brief Create a separate species by copying/moving some particles from a parent species
+ *
+ * @note These tracerspecies functions might still get renamed before we hand them to users
+ * @note A predicate(particle_t -> bool) might map badly to GPU. maybe offer predicate(dx,dy.dz,i,ux,uy,uz,w,id->bool there)
+ *
+ * @param parentspecies The species from which we source particles. When using "move" it will be modified.
+ * @param pid_list The user supplied list of particle IDs to trace.
+ * @param num_ids The number of particles to trace.
+ * @param copyormove An enum that can be Tracertype::Copy in which case the particle stays in the parrent species and a zero-weight copy is added to the new species or Tracertype::Move in which case the particle is removed from the parent species (and keeps it's statistical weight)
+ * @param tracername The name for the newly created species
+ * @param sp_list The list of species we intend to add the newly created species to. Allow to check that param nbame will not clash with any existing species in that list
+ * @param grid The global simulation grid. A reference to it will be stored inside the newly created tracer species
+ *
+ * @return The newly created tracer species
+ */
+species_t * tracerspecies_by_id( species_t* parentspecies,
+                       size_t* pid_list,
+                       size_t num_ids,
+                       const Tracertype copyormove,
+                       std::string tracername,
+                       species_t* sp_list,
+                       grid_t* grid
+                     ) { 
+  if(find_species_name(name.c_str(), sp_list)) {
+    ERROR(( "Species with name %d already exists", name.c_str() ));
+  }
+
+  const float q = parentspecies->q;
+  const float m = parentspecies->m;
+  
+  // We need Need to count particles so we can define the max_np and max_nm for the new species.
+  size_t count_max; // find the maximum over all ranks to prevent dropping of particles? 
+  for (int i=0; i < parentspecies->np; i++) {
+    if (std::binary_search(pid_list, pid_list+num_ids, parentspecies->p_id[i])) {
+      // DEBUG
+      sim_log("pid: " << parentspecies->p_id[i]);
+      count_max++;
+    }
+  }
+  
+  MPI_Allreduce(&count_true,&count_max, 1, MPI_LONG_LONG, MPI_MAX, MPI_COMM_WORLD); 
+  const size_t max_local_np = ceil(parentspecies->max_np * count_max/float(parentspecies->np)) + 1;
+  const size_t max_local_nm = ceil(parentspecies->max_nm * count_max/float(parentspecies->np)) + 1; // In some cases it is necessary to just use the max number as we need it to prevent dropping particles.
+  const int sort_interval = parentspecies->sort_interval;
+  const int sort_out_of_place = parentspecies->sort_out_of_place;
+
+  species_t* tracerspecies = species(name.c_str(), q, m, max_local_np, max_local_nm, sort_interval, sort_out_of_place, grid);
+  if(!tracerspecies) ERROR(( "Creation of tracerspecies failed" ));
+
+  // If we do compile without global_particle_IDs the resulting species will
+  // not actually be a good tracer species. But this function might be useful
+  // to peel of a fration of particles into a new species for other uses.
+  #ifdef VPIC_GLOBAL_PARTICLE_ID
+    // Grab into the species and make it have IDs
+    tracerspecies->has_ids = 1;
+    MALLOC_ALIGNED( tracerspecies->p_id, max_local_np, 128 );
+  #endif
+
+  // If the parentspecies has annotations we should have them on the tracers as well
+  #ifdef VPIC_PARTICLE_ANNOTATION
+  if(parentspecies->has_annotation){
+    tracerspecies->allocate_annotation_buffer(parentspecies->has_annotation);
+  }
+  #endif
+
+  // Select the desired fraction of particles from the parent species and add to the tracer species
+  int step = 0;
+  for(int i = 0; i < parentspecies->np; i++) {
+    if(std::binary_search(pid_list, pid_list+num_ids, parentspecies->p_id[i])) { // This particle was picked by the user provided predicate
+      // Copy that particle over
+      tracerspecies->p[step] = parentspecies->p[i];
+      tracerspecies->np++;
+      #ifdef VPIC_GLOBAL_PARTICLE_ID
+        // Create an ID
+        tracerspecies->p_id[step] = parentspecies->p_id[i];
+      #endif
+
+      #ifdef VPIC_PARTICLE_ANNOTATION
+      if(parentspecies->has_annotation){
+        for(int j=0; j<parentspecies->has_annotation; j++) {
+          const annotation_t v = parentspecies->get_annotation(i,j);
+          tracerspecies->set_annotation(step, j, v);
+        }
+      }
+      #endif
+
+      if(copyormove == Tracertype::Move) {
+        // Remove from parent species
+        parentspecies->p[i] = parentspecies->p[parentspecies->np-1];
+        parentspecies->np--;
+        // Reduce i by one to also check the particle that was copied in from the end of the array
+        i--;
+      } else if (copyormove == Tracertype::Copy) {
+        // Copied tracers should have zero statistical weight
+        tracerspecies->p[step].w = 0.;
+      } else {
+        ERROR(( "Invalid enum value for copyormove" ));
+      }
+      // Increment step
+      step++;
+    }
+  }
+
+  return tracerspecies; 
+}
