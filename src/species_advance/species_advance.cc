@@ -535,7 +535,7 @@ species_t * tracerspecies_by_id( species_t* parentspecies,
                        grid_t* grid
                      ) { 
   if(find_species_name(tracername.c_str(), sp_list)) {
-    ERROR(( "Species with name %d already exists", name.c_str() ));
+    ERROR(( "Species with name %d already exists", tracername.c_str() ));
   }
 
   const float q = parentspecies->q;
