@@ -552,6 +552,9 @@ species_t * tracerspecies_by_id( species_t* parentspecies,
     }
   }
   
+  MESSAGE(("count: %d",  count_true));
+  
+
   MPI_Allreduce(&count_true,&count_max, 1, MPI_LONG_LONG, MPI_MAX, MPI_COMM_WORLD); 
   const size_t max_local_np = ceil(parentspecies->max_np * count_max/float(parentspecies->np)) + 1;
   const size_t max_local_nm = ceil(parentspecies->max_nm * count_max/float(parentspecies->np)) + 1; // In some cases it is necessary to just use the max number as we need it to prevent dropping particles.
