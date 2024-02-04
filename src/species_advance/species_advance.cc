@@ -543,7 +543,7 @@ species_t * tracerspecies_by_id( species_t* parentspecies,
   
   // We need Need to count particles so we can define the max_np and max_nm for the new species.
   size_t count_max; // find the maximum over all ranks to prevent dropping of particles? 
-  size_t count_true;
+  size_t count_true = 0;
   for (int i=0; i < parentspecies->np; i++) {
     if (std::binary_search(pid_list, pid_list+num_ids, parentspecies->p_id[i])) {
       // DEBUG
