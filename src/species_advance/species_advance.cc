@@ -517,7 +517,7 @@ species_t * tracerspecies_by_predicate(species_t* parentspecies,
  * @note A predicate(particle_t -> bool) might map badly to GPU. maybe offer predicate(dx,dy.dz,i,ux,uy,uz,w,id->bool there)
  *
  * @param parentspecies The species from which we source particles. When using "move" it will be modified.
- * @param pid_list The user supplied list of particle IDs to trace.
+ * @param pid_list The user supplied list of particle IDs to trace. This needs to be sorted!
  * @param num_ids The number of particles to trace.
  * @param copyormove An enum that can be Tracertype::Copy in which case the particle stays in the parrent species and a zero-weight copy is added to the new species or Tracertype::Move in which case the particle is removed from the parent species (and keeps it's statistical weight)
  * @param tracername The name for the newly created species
